@@ -46,7 +46,8 @@ def str_to_list(string):
 def secondary_handler(file_string, parameter_path, dest_dir):
     param_dir = os.path.split(parameter_path)[0]
     basename = os.path.split(parameter_path)[1]
-    extension_list = str_to_list(file_string)
+    #extension_list = str_to_list(file_string)
+    extension_list = file_string
     for ext in extension_list:
         count = ext.count("^")
         if count != 0:
@@ -63,6 +64,12 @@ def secondary_handler(file_string, parameter_path, dest_dir):
         else:
             #assert(False) #TODO handle this
             print(secondary_file_name + " could not be found")
+
+
+
+#######################################################################
+###                 BEGIN MAIN PORTION OF SCRIPT                    ###
+#######################################################################
 
 input_yaml = sys.argv[1]
 yaml_dir = os.path.split(input_yaml)[0]
@@ -106,6 +113,7 @@ for key in data:
 #check for secondaryFiles from top level cwl
 #TODO cwl can be parsed as yaml- this will be more robust
 with open(workflow_cwl) as cwl_file:
+    '''
     lines = cwl_file.readlines()
     found_inputs = False
     for line in lines:
@@ -122,6 +130,25 @@ with open(workflow_cwl) as cwl_file:
                 
         if line.strip() == "inputs:":
             found_inputs = True
+    '''
+    cwl_dict = yaml.load(cwl_file)
+
+wf_inputs = cwl_dict["inputs"]
+for parameter_name in inputs:
+    if "secondaryFiles" in inputs[parameter_name]:
+        if parameter_name not in parameter_to_path: #could be missing in error or due to not including an optional parameter
+            if "type" in inputs[parameter_name] and str(inputs[parameter_name]["type"])[-1] == "?": #this check is safe because 'and' is short circuited
+                continue #omitted optional parameter: nothing to do here, skip to checking next parameter
+
+            #if we're here, the file wasn't found and it's probably not optional- however, there are edge cases where this might
+            #still be valid, so print out a warning and then continue
+            print("Skipping secondyFiles for workflow parameter " + parameter_name + ", parameter not found in inputs file")
+            continue
+        parameter_paths = parameter_to_path[parameter_name]
+        for parameter_path in parameter_paths:
+            secondary_handler(inputs[parameter_name]["secondaryFiles"], parameter_path, dest_dir)
+
+
 with open(processed_yaml, "w+") as output_file:
     yaml.dump(final_output, output_file)
 
