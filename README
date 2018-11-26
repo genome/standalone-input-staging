@@ -1,6 +1,7 @@
 The stager.py script copies all inputs to a cwl workflow into a single location
 in order to cut down on unnecessary file copying as Cromwell runs. To use, run
-python stager.py <input yaml | input json> <staging_directory> <workflow.cwl>
+python /usr/bin/stager.py <input yaml | input json> <staging_directory> <workflow.cwl>
+within the mgibio/standalone-input-staging docker image.
 It outputs a new yaml file, with "staged_" prepended to the name of the input
 yaml; this new file can then be used as normal to run the workflow. 
 
