@@ -134,10 +134,10 @@ with open(workflow_cwl) as cwl_file:
     cwl_dict = yaml.load(cwl_file)
 
 wf_inputs = cwl_dict["inputs"]
-for parameter_name in inputs:
-    if "secondaryFiles" in inputs[parameter_name]:
+for parameter_name in wf_inputs:
+    if "secondaryFiles" in wf_inputs[parameter_name]:
         if parameter_name not in parameter_to_path: #could be missing in error or due to not including an optional parameter
-            if "type" in inputs[parameter_name] and str(inputs[parameter_name]["type"])[-1] == "?": #this check is safe because 'and' is short circuited
+            if "type" in wf_inputs[parameter_name] and str(wf_inputs[parameter_name]["type"])[-1] == "?": #this check is safe because 'and' is short circuited
                 continue #omitted optional parameter: nothing to do here, skip to checking next parameter
 
             #if we're here, the file wasn't found and it's probably not optional- however, there are edge cases where this might
@@ -146,8 +146,7 @@ for parameter_name in inputs:
             continue
         parameter_paths = parameter_to_path[parameter_name]
         for parameter_path in parameter_paths:
-            secondary_handler(inputs[parameter_name]["secondaryFiles"], parameter_path, dest_dir)
-
+            secondary_handler(wf_inputs[parameter_name]["secondaryFiles"], parameter_path, dest_dir)
 
 with open(processed_yaml, "w+") as output_file:
     yaml.dump(final_output, output_file)
