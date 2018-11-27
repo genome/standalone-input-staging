@@ -36,17 +36,9 @@ def copier(abs_src_path, dest_path, is_file):
     #TODO should this be an absolute path?
     return dest_path + os.path.split(abs_src_path)[1]
 
-def str_to_list(string):
-    last_char = len(string) - 1
-    if string[0] != "[" or string[last_char] != "]":
-        assert(False) #TODO handle this better
-    raw = string[1:last_char] #[inclusive, exclusive]
-    return raw.split(",")
-
 def secondary_handler(file_string, parameter_path, dest_dir):
     param_dir = os.path.split(parameter_path)[0]
     basename = os.path.split(parameter_path)[1]
-    #extension_list = str_to_list(file_string)
     extension_list = file_string
     for ext in extension_list:
         count = ext.count("^")
@@ -113,24 +105,6 @@ for key in data:
 #check for secondaryFiles from top level cwl
 #TODO cwl can be parsed as yaml- this will be more robust
 with open(workflow_cwl) as cwl_file:
-    '''
-    lines = cwl_file.readlines()
-    found_inputs = False
-    for line in lines:
-        if found_inputs:
-            if line[0] != " ": #no indents, so next major section
-                break
-            line_arr = line.strip().replace(" ", "").replace('"','').split(":")
-            if line_arr[1] == "":
-                parameter_name = line_arr[0]
-            elif line_arr[0].lower() == "secondaryfiles":
-                parameter_paths = parameter_to_path[parameter_name] #TODO error possible here if there's a mistake in the yaml and parameters don't have a one to one mapping with those in the workflow inputs section
-                for parameter_path in parameter_paths:
-                    secondary_handler(line_arr[1], parameter_path, dest_dir)
-                
-        if line.strip() == "inputs:":
-            found_inputs = True
-    '''
     cwl_dict = yaml.load(cwl_file)
 
 wf_inputs = cwl_dict["inputs"]
